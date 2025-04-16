@@ -93,6 +93,66 @@ rstack/
 └── tailwind.config.js       // Tailwind CSS configuration
 ```
 
+## Environment Variables (T3-Style)
+
+This project uses a T3-style environment variable validation system powered by [zod](https://zod.dev/).
+
+- **Validation:** All required environment variables are validated at runtime.
+- **Separation:** Server-only and client-exposed (NEXT*PUBLIC*\*) variables are validated separately.
+- **Usage:** Import and use the `env` object from `@/lib/env` for type-safe, validated access to your environment variables.
+
+### Adding Environment Variables
+
+1. **Server Variables:**
+    - Add your variable to the `serverSchema` in `src/lib/env.ts`.
+    - Example: `DATABASE_URL: z.string().url()`
+2. **Client Variables:**
+    - Add your variable to the `clientSchema` in `src/lib/env.ts` (must start with `NEXT_PUBLIC_`).
+    - Example: `NEXT_PUBLIC_API_URL: z.string().url()`
+
+### Using Environment Variables
+
+```ts
+import { env } from '@/lib/env';
+
+console.log(env.DATABASE_URL); // server
+console.log(env.NEXT_PUBLIC_API_URL); // client
+```
+
+If validation fails, the app will throw an error and print details to the console.
+
+## Database: Drizzle ORM & PostgreSQL
+
+This project is set up with [Drizzle ORM](https://orm.drizzle.team/) and PostgreSQL for type-safe, modern database access.
+
+- **Configuration:**
+    - Connection and ORM setup: `src/lib/db/index.ts`
+    - Schema definitions: `src/lib/db/schema.ts`
+    - Drizzle config: `drizzle.config.ts` (project root)
+- **Environment:** Requires a `DATABASE_URL` in your environment variables (see env docs above).
+- **Example Table:**
+    - `hello` table with `id` (serial primary key) and `greeting` (text, not null)
+
+### Usage Example
+
+```ts
+import { db } from '@/lib/db';
+import { hello } from '@/lib/db/schema';
+
+// Query all greetings
+const greetings = await db.select().from(hello);
+```
+
+You can define more tables in `src/lib/db/schema.ts` using Drizzle's schema builder.
+
+## Migration Workflow Example
+
+```bash
+# Edit your schema in src/lib/db/schema.ts
+pnpm db:generate   # generates migration files in ./drizzle
+pnpm db:push       # applies migrations to your database
+```
+
 ## Learn More
 
 To learn more about the technologies used:
