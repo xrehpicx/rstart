@@ -1,4 +1,4 @@
-# rstack
+# rstart
 
 A modern full-stack boilerplate project built with cutting-edge technologies:
 
