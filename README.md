@@ -28,32 +28,42 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 ## Tech Stack Features
 
 ### Next.js App Router
+
 The project uses the latest Next.js features including the App Router for enhanced routing and server components.
 
 ### End-to-end Type Safety
+
 With tRPC, enjoy full type safety from your backend to frontend without any manual type synchronization.
 
 ### Modern Database Management
+
 Drizzle ORM provides a type-safe and performant way to interact with your database, with features like:
+
 - Type-safe schema declarations
 - Migrations management
 - Query building
 
 ### Authentication
+
 better-auth provides a modern authentication solution with:
+
 - Secure authentication flows
 - Multiple providers support
 - Session management
 
 ### Modern Styling with Tailwind CSS v4
+
 Latest version of Tailwind CSS offering:
+
 - Enhanced performance
 - Extended utility classes
 - Improved developer experience
 - Better customization options
 
 ### Code Quality and Formatting
+
 Strongly opinionated configurations for consistent code style:
+
 - Custom ESLint configuration with strict TypeScript rules
 - Tailored Prettier settings for consistent formatting
 - Pre-commit hooks for code quality enforcement
