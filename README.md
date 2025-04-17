@@ -11,6 +11,12 @@ A modern full-stack boilerplate project built with cutting-edge technologies:
 
 ## Getting Started
 
+> ⚠️ This project uses pnpm exclusively. Please ensure you have pnpm installed:
+>
+> ```bash
+> curl -fsSL https://get.pnpm.io/install.sh | sh -
+> ```
+
 First, install dependencies using pnpm:
 
 ```bash
@@ -49,6 +55,12 @@ export const appRouter = router({
 export type AppRouter = typeof appRouter;
 ```
 
+#### Why tRPC?
+
+- End-to-end type safety without manual schema syncing or code generation.
+- Rapid API development with minimal boilerplate and auto-inferred inputs/outputs.
+- Seamless React Query integration for caching and data fetching.
+
 ### Modern Database Management
 
 Drizzle ORM provides a type-safe and performant way to interact with your database, with features like:
@@ -56,6 +68,11 @@ Drizzle ORM provides a type-safe and performant way to interact with your databa
 - Type-safe schema declarations
 - Migrations management
 - Query building
+  +#### Why Drizzle ORM?
+
+* +- End-to-end TypeScript safety from schema to query responses.
+  +- Built-in migration tooling (`drizzle-kit`) for smooth schema evolution.
+  +- Lightweight and performant Postgres integration with minimal overhead.
 
 ### Authentication
 
@@ -64,6 +81,11 @@ better-auth provides a modern authentication solution with:
 - Secure authentication flows
 - Multiple providers support
 - Session management
+  +#### Why better-auth?
+
+* +- Extensible plugin-based design for adding custom auth logic.
+  +- Ready-to-use email/password & OAuth provider support.
+  +- Seamless integration with Drizzle for database-backed sessions.
 
 ### Modern Styling with Tailwind CSS v4
 
@@ -83,6 +105,19 @@ Strongly opinionated configurations for consistent code style:
 - Pre-commit hooks for code quality enforcement
 - Project-specific rules for better developer experience
 - Integrated VS Code settings for seamless development
+
+#### Git Hooks with Husky
+
+- Uses [Husky](https://typicode.github.io/husky) to manage Git hooks in the `.husky/` directory.
+- **Pre-commit hook** runs `lint-staged` to auto-format and lint your staged files, blocking commits on errors.
+- **Commit-msg hook** enforces commit message standards (e.g., Conventional Commits) before accepting your message.
+- Hooks install automatically via the `prepare` script on `pnpm install`.
+
+#### Editor and Commit Integration
+
+- Ensure your editor runs ESLint and Prettier on save (e.g., enable "Format on Save" in VSCode).
+- Recommended VSCode extensions: ESLint, Prettier, EditorConfig.
+- Lint or formatting failures will prevent commits; fix issues before staging.
 
 ## Project Structure
 
@@ -128,66 +163,4 @@ This project uses a T3-style environment variable validation system powered by [
     - Add your variable to the `serverSchema` in `src/lib/env.ts`.
     - Example: `DATABASE_URL: z.string().url()`
 2. **Client Variables:**
-    - Add your variable to the `clientSchema` in `src/lib/env.ts` (must start with `NEXT_PUBLIC_`).
-    - Example: `NEXT_PUBLIC_API_URL: z.string().url()`
-
-### Using Environment Variables
-
-```ts
-import { env } from '@/lib/env';
-
-console.log(env.DATABASE_URL); // server
-console.log(env.NEXT_PUBLIC_API_URL); // client
-```
-
-If validation fails, the app will throw an error and print details to the console.
-
-## Database: Drizzle ORM & PostgreSQL
-
-This project is set up with [Drizzle ORM](https://orm.drizzle.team/) and PostgreSQL for type-safe, modern database access.
-
-- **Configuration:**
-    - Connection and ORM setup: `src/server/db/index.ts`
-    - Schema definitions: `src/server/db/schema.ts`
-    - Drizzle config: `drizzle.config.ts` (project root)
-- **Environment:** Requires a `DATABASE_URL` in your environment variables (see env docs above).
-- **Example Table:**
-    - `hello` table with `id` (serial primary key) and `greeting` (text, not null)
-
-### Usage Example
-
-```ts
-import { db } from '@/server/db';
-import { hello } from '@/server/db/schema';
-
-// Query all greetings
-const greetings = await db.select().from(hello);
-```
-
-You can define more tables in `src/server/db/schema.ts` using Drizzle's schema builder.
-
-## Migration Workflow Example
-
-```bash
-# Edit your schema in src/server/db/schema.ts
-pnpm db:generate   # generates migration files in ./drizzle
-pnpm db:push       # applies migrations to your database
-```
-
-## Learn More
-
-To learn more about the technologies used:
-
-- [Next.js Documentation](https://nextjs.org/docs)
-- [tRPC Documentation](https://trpc.io/docs)
-- [Drizzle Documentation](https://orm.drizzle.team/docs/overview)
-- [better-auth Documentation](https://better-auth.dev/docs)
-- [Tailwind CSS Documentation](https://tailwindcss.com/docs)
-- [ESLint Configuration Guide](https://eslint.org/docs/latest/use/configure)
-- [Prettier Options](https://prettier.io/docs/en/options.html)
-
-## Deployment
-
-Deploy your rstack project with [Vercel](https://vercel.com) for the best Next.js experience.
-
-**tRPC endpoint**: `/api/trpc` — try it in your browser or via `curl "/api/trpc/hello"`
+    - Add your variable to the `clientSchema`
