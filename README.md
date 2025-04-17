@@ -25,6 +25,8 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+For tRPC client support, wrap your app in the `<TRPCProvider>` inside your `ThemeProvider` in `src/app/layout.tsx`.
+
 ## Tech Stack Features
 
 ### Next.js App Router
@@ -147,6 +149,7 @@ This project is set up with [Drizzle ORM](https://orm.drizzle.team/) and Postgre
 - **Configuration:**
     - Connection and ORM setup: `src/server/db/index.ts`
     - Schema definitions: `src/server/db/schema.ts`
+    - Drizzle config: `drizzle.config.ts` (project root)
 - **Environment:** Requires a `DATABASE_URL` in your environment variables (see env docs above).
 - **Example Table:**
     - `hello` table with `id` (serial primary key) and `greeting` (text, not null)
