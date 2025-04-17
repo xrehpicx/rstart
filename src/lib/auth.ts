@@ -1,17 +1,56 @@
 import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
-import { db } from './db';
-// Import the generated schema if you want to customize or extend it:
-// import * as authSchema from './db/auth-schema';
+import { db } from '@/server/db';
+import { nextCookies } from 'better-auth/next-js';
+import { admin } from 'better-auth/plugins/admin';
+import { sendEmail } from './email';
+import {
+    createVerificationEmail,
+    createResetPasswordEmail,
+} from './email-templates';
+
+if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is not set');
+}
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, {
         provider: 'pg',
-        // schema: authSchema, // Uncomment if you want to pass the generated schema
-        usePlural: true, // Most Drizzle schemas use plural table names
+        usePlural: true,
     }),
+    plugins: [
+        nextCookies(),
+        admin({
+            defaultRole: 'user',
+            impersonationSessionDuration: 60 * 60 * 24,
+        }),
+    ],
+    emailVerification: {
+        sendVerificationEmail: async ({ user, url }) => {
+            const { subject, html } = createVerificationEmail(url);
+            await sendEmail({ to: user.email, subject, html });
+        },
+        sendOnSignUp: true,
+        autoSignInAfterVerification: true,
+        expiresIn: 3600,
+    },
     emailAndPassword: {
         enabled: true,
+        disableSignUp: true,
+        requireEmailVerification: true,
+        minPasswordLength: 8,
+        maxPasswordLength: 128,
+        autoSignIn: true,
+        sendResetPassword: async ({ user, url }) => {
+            const { subject, html } = createResetPasswordEmail(url);
+            await sendEmail({ to: user.email, subject, html });
+        },
+        resetPasswordTokenExpiresIn: 3600,
     },
-    // Add more providers or config as needed
+    session: {
+        cookieCache: {
+            enabled: true,
+            maxAge: 5 * 60,
+        },
+    },
 });

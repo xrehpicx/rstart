@@ -35,6 +35,18 @@ The project uses the latest Next.js features including the App Router for enhanc
 
 With tRPC, enjoy full type safety from your backend to frontend without any manual type synchronization.
 
+#### Example tRPC Procedure
+
+```ts
+// src/server/trpc/router.ts
+import { router, publicProcedure } from '@/server/trpc/router';
+
+export const appRouter = router({
+    hello: publicProcedure.query(() => 'Hello world'),
+});
+export type AppRouter = typeof appRouter;
+```
+
 ### Modern Database Management
 
 Drizzle ORM provides a type-safe and performant way to interact with your database, with features like:
@@ -77,12 +89,19 @@ rstack/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx       // Main layout and metadata
+│   │   ├── api/
+│   │   │   └── trpc/
+│   │   │       └── [...trpc]/route.ts // Next.js tRPC handler
 │   │   ├── page.tsx         // Home page (example)
 │   │   └── globals.css      // Global styles
 │   ├── components/          // Reusable UI components
 │   ├── lib/                 // Utility functions and configurations
-│   ├── providers/           // Context providers (e.g., ThemeProvider)
-│   └── server/              // Backend logic (tRPC routers, Drizzle schemas, auth config)
+│   ├── providers/           // Context providers (ThemeProvider, TRPC Provider)
+│   │   ├── theme-provider.tsx
+│   │   └── trpc-provider.tsx // tRPC React provider
+│   └── server/              // Backend logic
+│       ├── db/              // Drizzle ORM (schema, pool, auth adapters)
+│       └── trpc/            // tRPC router definitions
 ├── public/                  // Static assets (images, fonts, etc.)
 ├── .vscode/                // VS Code configuration and settings
 ├── .github/                // GitHub workflows and templates
@@ -126,9 +145,8 @@ If validation fails, the app will throw an error and print details to the consol
 This project is set up with [Drizzle ORM](https://orm.drizzle.team/) and PostgreSQL for type-safe, modern database access.
 
 - **Configuration:**
-    - Connection and ORM setup: `src/lib/db/index.ts`
-    - Schema definitions: `src/lib/db/schema.ts`
-    - Drizzle config: `drizzle.config.ts` (project root)
+    - Connection and ORM setup: `src/server/db/index.ts`
+    - Schema definitions: `src/server/db/schema.ts`
 - **Environment:** Requires a `DATABASE_URL` in your environment variables (see env docs above).
 - **Example Table:**
     - `hello` table with `id` (serial primary key) and `greeting` (text, not null)
@@ -136,19 +154,19 @@ This project is set up with [Drizzle ORM](https://orm.drizzle.team/) and Postgre
 ### Usage Example
 
 ```ts
-import { db } from '@/lib/db';
-import { hello } from '@/lib/db/schema';
+import { db } from '@/server/db';
+import { hello } from '@/server/db/schema';
 
 // Query all greetings
 const greetings = await db.select().from(hello);
 ```
 
-You can define more tables in `src/lib/db/schema.ts` using Drizzle's schema builder.
+You can define more tables in `src/server/db/schema.ts` using Drizzle's schema builder.
 
 ## Migration Workflow Example
 
 ```bash
-# Edit your schema in src/lib/db/schema.ts
+# Edit your schema in src/server/db/schema.ts
 pnpm db:generate   # generates migration files in ./drizzle
 pnpm db:push       # applies migrations to your database
 ```
@@ -168,3 +186,5 @@ To learn more about the technologies used:
 ## Deployment
 
 Deploy your rstack project with [Vercel](https://vercel.com) for the best Next.js experience.
+
+**tRPC endpoint**: `/api/trpc` — try it in your browser or via `curl "/api/trpc/hello"`
