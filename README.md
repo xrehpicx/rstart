@@ -4,8 +4,8 @@ A modern full-stack boilerplate project built with cutting-edge technologies:
 
 - [Next.js](https://nextjs.org) - React framework for production
 - [tRPC](https://trpc.io) - End-to-end typesafe APIs
-- [Drizzle ORM](https://orm.drizzle.team) - TypeScript ORM for better database management
-- [better-auth](https://better-auth.dev) - Modern authentication solution
+- [Drizzle ORM](https://orm.drizzle.team/docs) - TypeScript ORM for better database management
+- [better-auth](https://better-auth.dev/docs) - Modern authentication solution
 - [Tailwind CSS v4](https://tailwindcss.com) - Next-generation utility-first CSS
 - Opinionated configurations for [ESLint](https://eslint.org) & [Prettier](https://prettier.io) - Code quality and formatting
 
@@ -37,7 +37,7 @@ For tRPC client support, wrap your app in the `<TRPCProvider>` inside your `Them
 
 ### Next.js App Router
 
-The project uses the latest Next.js features including the App Router for enhanced routing and server components.
+The project uses the latest Next.js features including App Router ([Docs](https://nextjs.org/docs/app)) for enhanced routing and server components.
 
 ### End-to-end Type Safety
 
@@ -63,29 +63,78 @@ export type AppRouter = typeof appRouter;
 
 ### Modern Database Management
 
-Drizzle ORM provides a type-safe and performant way to interact with your database, with features like:
+[Drizzle ORM](https://orm.drizzle.team/docs) provides a type-safe and performant way to interact with your database, with features like:
 
 - Type-safe schema declarations
 - Migrations management
 - Query building
   +#### Why Drizzle ORM?
 
-* +- End-to-end TypeScript safety from schema to query responses.
-  +- Built-in migration tooling (`drizzle-kit`) for smooth schema evolution.
-  +- Lightweight and performant Postgres integration with minimal overhead.
+- End-to-end TypeScript safety from schema to query responses.
+- Built-in migration tooling ([drizzle-kit](https://orm.drizzle.team/docs/kit)) for smooth schema evolution.
+- Lightweight and performant PostgreSQL integration with minimal overhead.
 
 ### Authentication
 
-better-auth provides a modern authentication solution with:
+better-auth provides a modern authentication solution ([Docs](https://better-auth.dev/docs)) with:
 
-- Secure authentication flows
-- Multiple providers support
-- Session management
-  +#### Why better-auth?
+- **Server config:** `src/server/auth/server.ts` — main Better Auth setup, including the admin plugin and custom user fields (e.g., `timezone` via `additionalFields`).
+- **Client helper:** `src/server/auth/client.ts` — provides React hooks and helpers for authentication, including admin features and type-safe user fields.
 
-* +- Extensible plugin-based design for adding custom auth logic.
-  +- Ready-to-use email/password & OAuth provider support.
-  +- Seamless integration with Drizzle for database-backed sessions.
+#### Example: Server Auth Setup
+
+```ts
+// src/server/auth/server.ts
+import { betterAuth } from 'better-auth';
+import { drizzleAdapter } from 'better-auth/adapters/drizzle';
+import { db } from '@/server/db';
+import { nextCookies } from 'better-auth/next-js';
+import { admin } from 'better-auth/plugins/admin';
+import { sendEmail } from '@/lib/email';
+import {
+    createVerificationEmail,
+    createResetPasswordEmail,
+} from '@/lib/email-templates';
+
+export const auth = betterAuth({
+    database: drizzleAdapter(db, { provider: 'pg', usePlural: true }),
+    plugins: [
+        nextCookies(),
+        admin({
+            defaultRole: 'user',
+            impersonationSessionDuration: 60 * 60 * 24,
+        }),
+    ],
+    user: {
+        additionalFields: {
+            timezone: { type: 'string', required: false, input: true },
+        },
+    },
+    // ...other config
+});
+
+// Helper to fetch user session on the server
+export async function getUserSession(headers: Headers | null = null) {
+    const _headers = headers ?? new Headers();
+    return await auth.api.getSession({ headers: _headers });
+}
+```
+
+#### Example: Client Auth Helper
+
+```ts
+// src/server/auth/client.ts
+import { createAuthClient } from 'better-auth/react';
+import { adminClient, inferAdditionalFields } from 'better-auth/client/plugins';
+import type { auth } from './server';
+
+export const authClient = createAuthClient({
+    baseURL: process.env.NEXT_PUBLIC_APP_URL,
+    plugins: [inferAdditionalFields<typeof auth>(), adminClient()],
+});
+
+export const { signIn, signOut, signUp, useSession } = authClient;
+```
 
 ### Modern Styling with Tailwind CSS v4
 
@@ -109,8 +158,8 @@ Strongly opinionated configurations for consistent code style:
 #### Git Hooks with Husky
 
 - Uses [Husky](https://typicode.github.io/husky) to manage Git hooks in the `.husky/` directory.
-- **Pre-commit hook** runs `lint-staged` to auto-format and lint your staged files, blocking commits on errors.
-- **Commit-msg hook** enforces commit message standards (e.g., Conventional Commits) before accepting your message.
+- **Pre-commit hook** runs [lint-staged](https://github.com/okonet/lint-staged) to auto-format and lint your staged files, blocking commits on errors.
+- **Commit-msg hook** enforces [Conventional Commits](https://www.conventionalcommits.org/) standards before accepting your message.
 - Hooks install automatically via the `prepare` script on `pnpm install`.
 
 #### Editor and Commit Integration
@@ -122,7 +171,7 @@ Strongly opinionated configurations for consistent code style:
 ## Project Structure
 
 ```plaintext
-rstack/
+rstart/
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx       // Main layout and metadata
@@ -138,6 +187,7 @@ rstack/
 │   │   └── trpc-provider.tsx // tRPC React provider
 │   └── server/              // Backend logic
 │       ├── db/              // Drizzle ORM (schema, pool, auth adapters)
+│       ├── auth/            // Authentication logic
 │       └── trpc/            // tRPC router definitions
 ├── public/                  // Static assets (images, fonts, etc.)
 ├── .vscode/                // VS Code configuration and settings
@@ -164,3 +214,11 @@ This project uses a T3-style environment variable validation system powered by [
     - Example: `DATABASE_URL: z.string().url()`
 2. **Client Variables:**
     - Add your variable to the `clientSchema`
+
+## Migration Workflow Example
+
+```bash
+# Edit your schema in src/server/db/schema.ts
+pnpm [drizzle-kit](https://orm.drizzle.team/docs/kit) generate   # generates migration files in ./drizzle
+pnpm db:push       # applies migrations to your database
+```

@@ -2,12 +2,12 @@ import { betterAuth } from 'better-auth';
 import { drizzleAdapter } from 'better-auth/adapters/drizzle';
 import { db } from '@/server/db';
 import { nextCookies } from 'better-auth/next-js';
-import { admin } from 'better-auth/plugins/admin';
-import { sendEmail } from './email';
+import { admin } from 'better-auth/plugins';
+import { sendEmail } from '@/lib/email';
 import {
     createVerificationEmail,
     createResetPasswordEmail,
-} from './email-templates';
+} from '@/lib/email-templates';
 
 if (!process.env.DATABASE_URL) {
     throw new Error('DATABASE_URL is not set');
@@ -54,3 +54,11 @@ export const auth = betterAuth({
         },
     },
 });
+
+export async function getUserSession(headers: Headers | null = null) {
+    const _headers = headers ?? new Headers();
+    const session = await auth.api.getSession({
+        headers: _headers,
+    });
+    return session;
+}
