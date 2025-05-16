@@ -100,6 +100,7 @@ The project combines the following technologies:
 - **Tailwind CSS v4** - Utility-first CSS framework with enhanced features
 - **TypeScript** - Full type safety across the entire application
 - **ESLint & Prettier** - Code quality and formatting enforced via pre-commit hooks
+- **pnpm** - Fast, disk space efficient package manager (required for this project)
 
 ## Project Structure
 
